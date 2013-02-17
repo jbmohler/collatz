@@ -5,6 +5,7 @@ import argparse
 parser = argparse.ArgumentParser(description='collatz sequence generator')
 parser.add_argument('exponent', nargs=1, type=int, help='initial exponent (likely 0)')
 parser.add_argument('datafile', nargs=1, help='text file to store glide results (likely new empty file)')
+parser.add_argument('-m', '--max', default=None, type=int, help='max exponent')
 args = parser.parse_args()
 
 args.datafile = args.datafile[0]
@@ -28,7 +29,7 @@ def CollatzAndLog( oFile, n ):
 if base == 1:
     CollatzAndLog( outFile, 0 )
 
-while True:
+while args.max is None or exponent < args.max:
     inputFile.seek( 0 )
 
     for line in inputFile:
