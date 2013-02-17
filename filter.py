@@ -24,23 +24,23 @@ def CollatzAndLog( oFile, n ):
         outFile.write( "%i,%i,%i,%i\n" % (d, n, 0, t ) )
     else:
         outFile.write( "%i,%i,%i,%i\n" % (d, n, len(str(n)), t) )
-    outFile.flush()
 
 if base == 1:
     CollatzAndLog( outFile, 0 )
+    outFile.flush()
 
 while args.max is None or exponent < args.max:
     inputFile.seek( 0 )
 
+    big_glides = []
     for line in inputFile:
         fields = line.split( ',' )
-        fields[0] = int( fields[0] )
-        fields[1] = int( fields[1] )
-        if fields[0] <= exponent:
-            continue
-        if fields[1] >= base:
-            break
-        CollatzAndLog( outFile, base + fields[1] )
+        if int(fields[0]) > exponent:
+            big_glides.append(int(fields[1]))
+
+    for v in big_glides:
+        CollatzAndLog(outFile, base + v)
+    outFile.flush()
 
     # Increment for the next loop
     exponent += 1
