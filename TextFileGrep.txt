@@ -1,0 +1,1 @@
+REMAINS=1;for (( i=1; i<34; i++ )); do SUBTRACT=`grep -E "^$i," collatz.txt | wc -l`;REMAINS=` dc -e "$REMAINS 2 * $SUBTRACT -  p" `; echo "$i:  $SUBTRACT  $REMAINS";  done

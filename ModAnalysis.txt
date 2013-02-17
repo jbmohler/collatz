@@ -1,0 +1,47 @@
+Thoughts:
+
+If you have a number of the form 4n+1 (n is an integer),
+	12n+4
+	6n+2
+	3n+1
+
+	3n+1 < 4n+1 for all n>0.  This means that 4n+1 will always have a short glide!
+
+8n+3
+	24n+10
+	12n+5
+	But, if l=3n+1, 12n+5 = 4l+1
+
+16n+7
+	48n+22
+	24n+11
+	But, if l=3n+1, 24n+11 = 8l+3
+
+Likewise, 32n+15 -> 16l+7
+
+That means in some sense that all numbers will eventually "decay" to a 4n+1.
+
+Which means that all cycles must contain a 4n+1.  An exception to this is -2,-1,-2...
+
+*********
+Here are other numbers with a short glide
+2n
+4n+1
+16n+3
+32n+11
+32n+23
+128n+7
+128n+15
+128n+59
+256n+39
+256n+79
+256n+95
+256n+123
+256n+175
+256n+199
+256n+219
+1024n+347
+1024n+507
+1024n+923
+1024n+999
+4096n+1019

@@ -1,0 +1,10 @@
+This is a sequence from J.H. Conway
+
+f(4n+1) = 3n+1
+f(4n-1) = 3n-1
+f(2n)   = 3n
+
+NOTES:
+	Can be inversed
+	Tends to produce sequences going off both ways to \infty
+	

@@ -1,0 +1,75 @@
+\documentclass{article}
+\usepackage{amssymb,amsthm,amsmath,amsfonts}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+
+\section{Definitions}
+
+Define a collatz sequence with initial term $T$ by 
+\[
+C_0=T\textrm{ and }C_{n+1}=\left\{
+\begin{array}{cll}\frac{C_n}{2}=\delta(C_n)&\textrm{if }C_n\textrm{ is divisible by }2&A \emph{dividing} iteration\\
+3C_n+1=\mu(C_n)&\textrm{otherwise}&A \emph{multiplying} iteration\end{array}\right.
+\]
+for $n\geq 1$.
+
+\section{Alternative}
+This is a sequence from J.H. Conway
+\begin{eqnarray*}
+f(4n+1)&=&3n+1\\
+f(4n-1)&=&3n-1\\
+f(2n)&=&3n
+\end{eqnarray*}
+
+Note that this can be inverted.  Empirically, this tends to produce sequences going off both ways to $\infty$.
+
+\section{Observations}
+
+Besides the trivial cycle ($0$ repeating), there are four known cycles which may occur in such sequences:
+\[\begin{array}{c}
+4,2,1,4\\
+0,0\\
+-5,-14,-7,-20,-10,-5\\
+-2,-1,-2\\
+-17,-50,-25,-74,-37,-110,-55,-164,-82,-41,-122,-61,-182,-91,-272,-136,-68,-34,-17
+\end{array}\]
+We are most interested in the cycle of positive numbers.  Most of what follows is specific to initial terms $T>0$.
+
+\begin{definition}
+A \emph{glide} is the sequence of collatz iterations performed on an integer $k$ until the result $k_1\leq k$.
+\end{definition}
+
+$27$ is the smallest number with a shockingly long glide - of length $97$!
+
+\section{Cross References}
+There is a vague connection to the ``On-Line Encyclopedia of Integer Sequences'' sequence A036994.  This is seen when you look at the 
+increasing sequence of positive numbers which is left after you filter out all the numbers which have a redundant glide 
+with a smaller number.  The sequence in the encyclopedia is defined by ``Reading from right to left in the binary expansion of n, 
+the number of 1's always stays ahead of the number of 0's''.
+
+\section{Home Grown Theory}
+
+\begin{theorem}
+An integer $k$ with a glide with $n$ divides will also be a glide for $2^n+k$.
+\end{theorem}
+
+\begin{proof}
+Suppose that an integer $k$ has a glide $G$ with $n$ dividing iterations and $m$ multiplication iterations.  By definition, 
+$Gk=k_1<k$.  
+Note that for $k$, the following holds since the multiplication operator results in a number always strictly greater 
+than $3$ times the original:
+\[
+\frac{3^m}{2^n}k<k_1<k\textrm{.}
+\]
+Thus it must be that $3^m<2^n$.
+
+Consider the number $p 2^n+k$.  The collatz operator applied to $p 2^n+k$ will result in the glide $G$ and 
+\[
+G(p2^n+k)=3^m+k_1\mbox{.}
+\]
+Since $p 3^m<p 2^n$ and $k_1<k$, it must be that $p 3^m+k_1<p 2^n+k$.
+\end{proof}
+\end{document}
