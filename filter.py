@@ -1,56 +1,46 @@
 #!/usr/bin/python
 import Collatz
-import sys
 import argparse
 
+parser = argparse.ArgumentParser(description='collatz sequence generator')
+parser.add_argument('exponent', nargs=1, type=int, help='initial exponent (likely 0)')
+parser.add_argument('datafile', nargs=1, help='text file to store glide results (likely new empty file)')
+args = parser.parse_args()
+
+args.datafile = args.datafile[0]
+args.exponent = args.exponent[0]
+
+outFile = open( args.datafile, "a" )
+inputFile = open( args.datafile, "r" )
+
+base = 2**args.exponent
+exponent = args.exponent
+
 def CollatzAndLog( oFile, n ):
-	t,d,m = Collatz.CollatzGlideCounts( n )
+    t,d,m = Collatz.CollatzGlideCounts( n )
 
-#	print( "%i,%i,%i,%i\n" % (d, n, len( str( n ) ), t ) )
-	unpad = str(n).lstrip( '0' )
-	outFile.write( "%i,%i,%i,%i\n" % (d, n, len( unpad ), t ) )
-	outFile.flush()
-	
+    if n == 0:
+        outFile.write( "%i,%i,%i,%i\n" % (d, n, 0, t ) )
+    else:
+        outFile.write( "%i,%i,%i,%i\n" % (d, n, len(str(n)), t) )
+    outFile.flush()
 
-if len( sys.argv ) < 3:
-	sys.stderr.write( "You must supply a file name\n" )
-	sys.stderr.flush()
-	sys.exit( -1 )
-
-outFile = open( sys.argv[2], "a" )
-inputFile = open( sys.argv[2], "r" )
-
-if inputFile == None or outFile == None:
-	sys.stderr.write( "Failed to open text file:  %s\n" % (sys.argv[2]) )
-	sys.stderr.flush()
-	sys.exit()
-
-base = 1
-exponent = 0
-startAt = 0
-if len( sys.argv ) > 0:
-	startAt = int( sys.argv[1] )
-	# current starting point
-	while exponent < startAt:
-		exponent = exponent + 1
-		base *= 2
-
-if startAt == 0:
-	CollatzAndLog( outFile, 0 )
+if base == 1:
+    CollatzAndLog( outFile, 0 )
 
 while True:
-	inputFile.seek( 0 )
+    inputFile.seek( 0 )
 
-	for line in inputFile:
-		fields = line.split( ',' )
-		fields[0] = int( fields[0] )
-		fields[1] = int( fields[1] )
-		if fields[0] <= exponent:
-			continue
-		if fields[1] >= base:
-			break
-		CollatzAndLog( outFile, base + fields[1] )
+    for line in inputFile:
+        fields = line.split( ',' )
+        fields[0] = int( fields[0] )
+        fields[1] = int( fields[1] )
+        if fields[0] <= exponent:
+            continue
+        if fields[1] >= base:
+            break
+        CollatzAndLog( outFile, base + fields[1] )
 
-	# Increment for the next loop
-	exponent += 1
-	base *= 2
+    # Increment for the next loop
+    exponent += 1
+    base *= 2
