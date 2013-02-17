@@ -1,5 +1,4 @@
 
-
 def CollatzGlideCounts( n ):
     d = 0
     m = 0
@@ -26,3 +25,14 @@ def CollatzGlideString( n ):
             string += "0"
         cnt = cnt + 1
     return string
+
+def GlideLogLine(n):
+    t,d,m = CollatzGlideCounts(n)
+
+    if n == 0:
+        return "%i,%i,%i,%i\n" % (d, n, 0, t)
+    else:
+        return "%i,%i,%i,%i\n" % (d, n, len(str(n)), t)
+
+def GlideLogLines(l):
+    return [GlideLogLine(n) for n in l]

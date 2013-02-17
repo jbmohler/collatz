@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import Collatz
 import argparse
-import threading
 
 parser = argparse.ArgumentParser(description='collatz sequence generator')
 parser.add_argument('exponent', nargs=1, type=int, help='initial exponent (likely 0)')
@@ -19,20 +18,16 @@ inputFile = open(args.datafile, "r")
 base = 2**args.exponent
 exponent = args.exponent
 
-def GlideLogLine(n):
-    t,d,m = Collatz.CollatzGlideCounts(n)
-
-    if n == 0:
-        return "%i,%i,%i,%i\n" % (d, n, 0, t)
-    else:
-        return "%i,%i,%i,%i\n" % (d, n, len(str(n)), t)
-
-def GlideLogLines(l):
-    return [GlideLogLine(n) for n in l]
-
 if base == 1:
-    outFile.write(GlideLogLine(0))
+    outFile.write(Collatz.GlideLogLine(0))
     outFile.flush()
+
+class WorkHunk(object):
+    def __init__(self, l, index):
+        self.l = l
+
+    def join(self):
+        return Collatz.GlideLogLines(self.l)
 
 while args.max is None or exponent < args.max:
     inputFile.seek(0)
@@ -43,7 +38,9 @@ while args.max is None or exponent < args.max:
         if int(fields[0]) > exponent:
             big_glides.append(base+int(fields[1]))
 
-    outFile.write(''.join(GlideLogLines(big_glides)))
+    w = WorkHunk(big_glides)
+
+    outFile.write(''.join(w.join()))
     outFile.flush()
 
     # Increment for the next loop
