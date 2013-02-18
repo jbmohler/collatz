@@ -20,6 +20,7 @@ while True:
         break
 
     if obj[0] == 'glides':
+        #print "glides for:  ", len(obj[1])
         s1.send_pyobj(Collatz.GlideLogLines(obj[1]))
     else:
         s1.send_pyobj(eval(obj))

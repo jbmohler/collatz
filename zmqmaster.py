@@ -12,6 +12,13 @@ s1 = context.socket(zmq.REQ)
 
 s1.connect(args.addr[0])
 
+
+s1.send_pyobj(('glides', []))
+print s1.recv_pyobj()
+
+s1.send_pyobj(('glides', [1]))
+print s1.recv_pyobj()
+
 s1.send_pyobj('1+2')
 print s1.recv_pyobj()
 
