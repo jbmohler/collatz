@@ -28,12 +28,12 @@ context = zmq.Context()
 class WorkHunk(object):
     def __init__(self, l, index):
         self.l = l
-        self.socket = context.socket(zmq.REQ)
-        self.socket.connect('tcp://127.0.0.1:{0}'.format(5555+index))
-        self.socket.send_pyobj(('glides', self.l))
+        #self.socket = context.socket(zmq.REQ)
+        #self.socket.connect('tcp://127.0.0.1:{0}'.format(5555+index))
+        #self.socket.send_pyobj(('glides', self.l))
 
     def join(self):
-        #return Collatz.GlideLogLines(self.l)
+        return Collatz.GlideLogLines(self.l)
         return self.socket.recv_pyobj()
 
 while args.max is None or exponent < args.max:
