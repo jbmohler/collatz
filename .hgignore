@@ -1,3 +1,8 @@
 syntax: glob
 
+
+build
+src/*.c
 *.pyc
+__pycache__
+divides-*.pickle
