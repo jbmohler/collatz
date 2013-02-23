@@ -1,6 +1,8 @@
 syntax: glob
 
 
+local
+mpir-2*
 build
 src/*.c
 *.pyc
