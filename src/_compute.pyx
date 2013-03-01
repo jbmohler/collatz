@@ -60,6 +60,20 @@ def GlideString( n ):
         cnt = cnt + 1
     return string
 
+def Glide(n, compress=False):
+    cnt = 0
+    t = n
+    while t > n or cnt < 1:
+        yield t
+        if t % 2:
+            t = 3 * t + 1
+            if compress:
+                t //= 2
+        else:
+            t //= 2
+        cnt = cnt + 1
+    yield t
+
 def GlideLogLine(n):
     d = GlideDivides(n)
     t = 0 # nada
