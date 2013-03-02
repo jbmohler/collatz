@@ -37,5 +37,5 @@ while args.max is None or exponent < args.max:
     exponent += 1
     base *= 2
 
-fname = 'divides-{0}.pickle'.format('x'*(args.max//4))
+fname = 'data/divides-{0}.pickle'.format('x'*(args.max//4))
 open(fname, 'w').write(pickle.dumps(divides))
