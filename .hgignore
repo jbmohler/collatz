@@ -8,3 +8,4 @@ src/*.c
 *.pyc
 __pycache__
 divides-*.pickle
+c/single
