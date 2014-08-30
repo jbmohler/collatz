@@ -9,19 +9,19 @@ int glide_divides(mpz_t n)
     mpz_t temp;
     mpz_init_set(temp, n);
     while(mpz_cmp(temp, n)>0 || (d+m) < 1)
-	{
+    {
         if(1 == mpz_tstbit(temp, 0))
-		{
+        {
             m = m + 1;
             mpz_mul_ui(temp, temp, 3);
             mpz_add_ui(temp, temp, 1);
-		}
+        }
         else
-		{
+        {
             d = d + 1;
             mpz_fdiv_q_2exp(temp, temp, 1);
-		}
-	}
+        }
+    }
     mpz_clear(temp);
     return d;
 }
