@@ -3,12 +3,11 @@
 #include <mpir.h>
 //#include <pthread.h>
 
-int glide_divides(mpz_t n)
+int glide_divides(mpz_t n, mpz_t temp)
 {
     int d = 0;
     int m = 0;
-    mpz_t temp;
-    mpz_init_set(temp, n);
+    mpz_set(temp, n);
     while(mpz_cmp(temp, n)>0 || (d+m) < 1)
     {
         if(1 == mpz_tstbit(temp, 0))
@@ -23,7 +22,6 @@ int glide_divides(mpz_t n)
             mpz_fdiv_q_2exp(temp, temp, 1);
         }
     }
-    mpz_clear(temp);
     return d;
 }
 
@@ -73,7 +71,7 @@ int read_file_line(FILE *f, mpz_t n, unsigned long *divides)
     *divides = strtoul(&line[17], NULL, 10);
 }
 
-#define MAX_COUNT  (1<<20)
+#define MAX_COUNT  (1<<24)
 
 int main(int argc, const char* argv[])
 {
@@ -81,11 +79,13 @@ int main(int argc, const char* argv[])
     mpz_t hold;
     mpz_t base;
     mpz_t specimen;
+    mpz_t temp;
     unsigned long d;
 
     mpz_init(hold);
     mpz_init(base);
     mpz_init(specimen);
+    mpz_init(temp);
 
     // prepare file
     int total_index = 0;
@@ -109,7 +109,7 @@ int main(int argc, const char* argv[])
                 continue;
 
             mpz_add(specimen, base, hold);
-            d = glide_divides(specimen);
+            d = glide_divides(specimen, temp);
             write_struct_line(&store[total_index++], specimen, d);
 	    if( total_index == MAX_COUNT )
                 break;
@@ -124,6 +124,7 @@ int main(int argc, const char* argv[])
     mpz_clear(specimen);
     mpz_clear(base);
     mpz_clear(hold);
+    mpz_clear(temp);
 
     FILE *f = fopen("collatz_data.txt", "w");
     //FILE *src = fopen("collatz_data.txt", "r");
