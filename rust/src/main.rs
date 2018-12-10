@@ -1,3 +1,6 @@
+extern crate itertools;
+
+use itertools::Itertools;
 
 struct BitSuffix {
     bitcount: i32,
@@ -31,13 +34,14 @@ fn run_collatz(ex: i64) -> (i32, Vec<u8>) {
 }
 
 fn main() {
+    let cutoff = 30;
     let mut bitcount = 1;
     let mut sigs : Vec<BitSuffix> = Vec::new();
 
     fn compute_and_push(ex : i64, newsigs : &mut Vec<BitSuffix>) {
         let results = run_collatz(ex);
         let xx = BitSuffix {bitcount: results.0, exemplar: ex, sigstr: results.1};
-        println!("{:0}: {:1} -- {:?}", xx.exemplar, xx.bitcount, xx.sigstr);
+        //println!("{:0}: {:1} -- {:?}", xx.exemplar, xx.bitcount, xx.sigstr);
         newsigs.push(xx);
     };
 
@@ -62,10 +66,18 @@ fn main() {
 
         bitcount += 1;
 
-        if bitcount == 18 {
+        if bitcount == cutoff {
             break;
         }
     }
 
-    println!("Hello, world!");
+
+    sigs.sort_by_key(|elt| elt.bitcount);
+
+    for (k, grp) in &sigs.into_iter().group_by(|elt| elt.bitcount) {
+        if k >= cutoff {
+            break;
+        }
+        println!("bit {}: count {}", k, grp.into_iter().count());
+    }
 }

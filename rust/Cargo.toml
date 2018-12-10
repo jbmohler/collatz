@@ -3,3 +3,7 @@
 name = "collatz_sequencer"
 version = "0.0.1"
 authors = [ "Joel B. Mohler <joel@kiwistrawberry.us>" ]
+
+[dependencies]
+
+itertools = "0.8.0"
