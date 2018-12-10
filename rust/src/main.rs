@@ -32,35 +32,37 @@ fn run_collatz(ex: i64) -> (i32, Vec<u8>) {
 
 fn main() {
     let mut bitcount = 1;
-    let mut sigs = Vec::new();
+    let mut sigs : Vec<BitSuffix> = Vec::new();
 
-    let mut compute_and_push = |ex| {
+    fn compute_and_push(ex : i64, newsigs : &mut Vec<BitSuffix>) {
         let results = run_collatz(ex);
         let xx = BitSuffix {bitcount: results.0, exemplar: ex, sigstr: results.1};
         println!("{:0}: {:1} -- {:?}", xx.exemplar, xx.bitcount, xx.sigstr);
-        sigs.push(xx);
+        newsigs.push(xx);
     };
 
     loop {
         println!("Check new bit patterns of lenth {}", bitcount);
 
-        let base = 1 << bitcount;
+        let mut newsigs : Vec<BitSuffix> = Vec::new();
+        let base = 1 << (bitcount - 1);
 
         if bitcount == 1 {
             // seed this
-            compute_and_push(1);
+            compute_and_push(1, &mut newsigs);
         } else {
-            let myslice = sigs[0 .. sigs.len()-1];
-            for sig in myslice.into_iter() {
-                if sig.bitcount > bitcount {
-                    compute_and_push(base+sig.exemplar);
+            for sig in sigs.iter() {
+                if sig.bitcount >= bitcount {
+                    compute_and_push(base+sig.exemplar, &mut newsigs);
                 }
             }
         }
 
+        sigs.extend(newsigs);
+
         bitcount += 1;
 
-        if bitcount == 6 {
+        if bitcount == 18 {
             break;
         }
     }
