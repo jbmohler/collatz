@@ -5,42 +5,45 @@ use itertools::Itertools;
 struct BitSuffix {
     bitcount: i32,
     exemplar: i64,
-    sigstr: Vec<u8>,
+    //sigstr: Vec<u8>,
 }
 
-fn run_collatz(ex: i64) -> (i32, Vec<u8>) {
+//fn run_collatz(ex: i64) -> (i32, Vec<u8>) {
+fn run_collatz(ex: i64) -> i32 {
     // only operates on odd positive integers
     assert!(ex > 0 and ex % 2 == 1);
 
     let mut cc = ex;
-    let mut sig = Vec::new();
+    //let mut sig = Vec::new();
     let mut bc = 0;
 
-    sig.push(1);
+    //sig.push(1);
     cc = cc * 3 + 1;
 
     while cc > ex {
         if cc % 2 == 1 {
-            sig.push(1);
+            //sig.push(1);
             cc = cc * 3 + 1;
         } else {
-            sig.push(0);
+            //sig.push(0);
             cc = cc / 2;
             bc += 1;
         }
     }
 
-    return (bc, sig);
+    return bc;
 }
 
 fn main() {
-    let cutoff = 30;
+    let cutoff = 32;
     let mut bitcount = 1;
     let mut sigs : Vec<BitSuffix> = Vec::new();
 
     fn compute_and_push(ex : i64, newsigs : &mut Vec<BitSuffix>) {
-        let results = run_collatz(ex);
-        let xx = BitSuffix {bitcount: results.0, exemplar: ex, sigstr: results.1};
+        //let results = run_collatz(ex);
+        //let xx = BitSuffix {bitcount: results.0, exemplar: ex, sigstr: results.1};
+        let bitcount = run_collatz(ex);
+        let xx = BitSuffix {bitcount: bitcount, exemplar: ex};
         //println!("{:0}: {:1} -- {:?}", xx.exemplar, xx.bitcount, xx.sigstr);
         newsigs.push(xx);
     };
