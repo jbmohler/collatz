@@ -1,3 +1,4 @@
 syntax: glob
 
+collatz_exemplars.txt
 target
