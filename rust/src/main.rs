@@ -7,8 +7,8 @@ use std::fs::File;
 use std::path::Path;
 
 struct BitSuffix {
-    bitcount: i32,
-    exemplar: i64,
+    bitcount: u32,
+    exemplar: u64,
     //sigstr: Vec<u8>,
 }
 
@@ -22,14 +22,14 @@ impl BitSuffix {
 
     fn from_bytes(buf: &[u8; 26]) -> BitSuffix {
         let s = str::from_utf8(buf).unwrap();
-        let i = i64::from_str_radix(s[0..12].trim_start(), 16).unwrap();
-        let bitcount = i32::from_str_radix(s[13..25].trim_start(), 10).unwrap();
+        let i = u64::from_str_radix(s[0..12].trim_start(), 16).unwrap();
+        let bitcount = u32::from_str_radix(s[13..25].trim_start(), 10).unwrap();
         return BitSuffix { bitcount: bitcount, exemplar: i };
     }
 }
 
-//fn run_collatz(ex: i64) -> (i32, Vec<u8>) {
-fn run_collatz(ex: i64) -> i32 {
+//fn run_collatz(ex: u64) -> (u32, Vec<u8>) {
+fn run_collatz(ex: u64) -> u32 {
     // only operates on odd positive integers
     assert!(ex > 0 and ex % 2 == 1);
 
@@ -55,7 +55,7 @@ fn run_collatz(ex: i64) -> i32 {
 }
 
 fn main() {
-    let cutoff = 37;
+    let cutoff = 18;
     let mut bitcount = 1;
     //let mut sigs : Vec<BitSuffix> = Vec::new();
     let path = Path::new("collatz_exemplars.txt");
@@ -75,12 +75,12 @@ fn main() {
         Ok(file) => file,
     };
 
-    fn compute_and_push(ex : i64, ofile : &mut File) {
+    fn compute_and_push(ex : u64, ofile : &mut File) {
         //let results = run_collatz(ex);
         //let xx = BitSuffix {bitcount: results.0, exemplar: ex, sigstr: results.1};
         let bitcount = run_collatz(ex);
         let xx = BitSuffix {bitcount: bitcount, exemplar: ex};
-        ofile.write_all(&xx.into_bytes());
+        ofile.write_all(&xx.into_bytes()).unwrap();
         //println!("{:0}: {:1} -- {:?}", xx.exemplar, xx.bitcount, xx.sigstr);
         //newsigs.push(xx);
     };
@@ -95,10 +95,10 @@ fn main() {
             // seed this
             compute_and_push(1, &mut outfile);
         } else {
-            infile.seek(SeekFrom::Start(0));
+            infile.seek(SeekFrom::Start(0)).unwrap();
             let mut readbuf = [0u8; 26];
             loop {
-                infile.read_exact(&mut readbuf);
+                infile.read_exact(&mut readbuf).unwrap();
 
                 let sig = BitSuffix::from_bytes(&readbuf);
                 if sig.exemplar > base {
