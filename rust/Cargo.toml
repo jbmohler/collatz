@@ -7,3 +7,4 @@ authors = [ "Joel B. Mohler <joel@kiwistrawberry.us>" ]
 [dependencies]
 
 itertools = "0.8.0"
+argparse = "0.2.2"

@@ -7,6 +7,7 @@ This is me learning rust.  So far I have:
 * learned about mutable references
 * wrote file IO learning about errors
 * learned about scope with a closure
+* use crates specified in Cargo.toml
 
 # The Collatz conjecture
 

@@ -1,10 +1,11 @@
 extern crate itertools;
-use std::str;
+extern crate argparse;
 use std::error::Error;
 use std::io::SeekFrom;
 use std::io::prelude::*;
 use std::fs::File;
 use std::path::Path;
+use argparse::{ArgumentParser, Store};
 
 fn format_hex(buf : &mut [u8], value : u64) {
     let mut t = value;
@@ -121,9 +122,8 @@ fn read_decimal(buf : &[u8]) -> u32 {
 }
 
 struct BitSuffix {
-    bitcount: u32,
     exemplar: u64,
-    //sigstr: Vec<u8>,
+    bitcount: u32,
 }
 
 impl BitSuffix {
@@ -142,37 +142,46 @@ impl BitSuffix {
     }
 }
 
-//fn run_collatz(ex: u64) -> (u32, Vec<u8>) {
-fn run_collatz(ex: u64) -> u32 {
+fn run_collatz(ex: u64) -> BitSuffix {
     // only operates on odd positive integers
     assert!(ex > 0 and ex % 2 == 1);
 
     let mut cc = ex;
-    //let mut sig = Vec::new();
     let mut bc = 0;
 
-    //sig.push(1);
     cc = cc * 3 + 1;
 
     while cc > ex {
         if cc % 2 == 1 {
-            //sig.push(1);
             cc = cc * 3 + 1;
         } else {
-            //sig.push(0);
             cc = cc / 2;
             bc += 1;
         }
     }
 
-    return bc;
+    return BitSuffix { exemplar: ex, bitcount: bc };
 }
 
 fn main() {
-    let cutoff = 32;
+    let mut cutoff = 25;
+    let mut filename = "collatz_exemplars.txt".to_string();
+    {  // this block limits scope of borrows by ap.refer() method
+        let mut ap = ArgumentParser::new();
+        ap.set_description("Compute collatz glide bitcounts for 1..2^cutoff");
+        ap.refer(&mut cutoff)
+            .add_option(&["-c", "--cutoff"], Store,
+            "cutoff");
+        ap.refer(&mut filename)
+            .add_option(&["--file"], Store,
+            "");
+        ap.parse_args_or_exit();
+    }
+
+
     let mut bitcount = 1;
     //let mut sigs : Vec<BitSuffix> = Vec::new();
-    let path = Path::new("collatz_exemplars.txt");
+    let path = Path::new(&filename);
     let display = path.display();
 
     let mut outfile = match File::create(&path) {
@@ -190,13 +199,8 @@ fn main() {
     };
 
     fn compute_and_push(ex : u64, ofile : &mut File) {
-        //let results = run_collatz(ex);
-        //let xx = BitSuffix {bitcount: results.0, exemplar: ex, sigstr: results.1};
-        let bitcount = run_collatz(ex);
-        let xx = BitSuffix {bitcount: bitcount, exemplar: ex};
+        let xx = run_collatz(ex);
         ofile.write_all(&xx.into_bytes()).unwrap();
-        //println!("{:0}: {:1} -- {:?}", xx.exemplar, xx.bitcount, xx.sigstr);
-        //newsigs.push(xx);
     };
 
     loop {
