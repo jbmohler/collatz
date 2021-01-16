@@ -1,6 +1,5 @@
 extern crate itertools;
 extern crate argparse;
-use std::error::Error;
 use std::io::SeekFrom;
 use std::io::prelude::*;
 use std::fs::File;
@@ -144,7 +143,7 @@ impl BitSuffix {
 
 fn run_collatz(ex: u64) -> BitSuffix {
     // only operates on odd positive integers
-    assert!(ex > 0 and ex % 2 == 1);
+    assert!(ex > 0 && ex % 2 == 1);
 
     let mut cc = ex;
     let mut bc = 0;
@@ -187,14 +186,14 @@ fn main() {
     let mut outfile = match File::create(&path) {
         Err(why) => panic!("couldn't create {}: {}",
                            display,
-                           why.description()),
+                           why),
         Ok(file) => file,
     };
 
     let mut infile = match File::open(&path) {
         Err(why) => panic!("couldn't open for reading {}: {}",
                            display,
-                           why.description()),
+                           why),
         Ok(file) => file,
     };
 
