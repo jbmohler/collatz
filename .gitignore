@@ -8,3 +8,4 @@ divides-*.pickle
 c/single
 
 rust/target
+rust/collatz_exemplars.txt
