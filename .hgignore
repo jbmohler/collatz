@@ -9,3 +9,5 @@ src/*.c
 __pycache__
 divides-*.pickle
 c/single
+
+rust/target
