@@ -1,12 +1,12 @@
-extern crate itertools;
 extern crate argparse;
-use std::io::SeekFrom;
-use std::io::prelude::*;
-use std::fs::File;
-use std::path::Path;
+extern crate itertools;
 use argparse::{ArgumentParser, Store};
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::SeekFrom;
+use std::path::Path;
 
-fn format_hex(buf : &mut [u8], value : u64) {
+fn format_hex(buf: &mut [u8], value: u64) {
     let mut t = value;
     for index in (0..buf.len()).rev() {
         let v = match t % 16 {
@@ -26,7 +26,7 @@ fn format_hex(buf : &mut [u8], value : u64) {
             13 => b'd',
             14 => b'e',
             15 => b'f',
-            _ => panic!("arithmetic confusion")
+            _ => panic!("arithmetic confusion"),
         };
         buf[index] = v;
         t >>= 4;
@@ -36,7 +36,7 @@ fn format_hex(buf : &mut [u8], value : u64) {
     }
 }
 
-fn format_decimal(buf : &mut [u8], value : u32) {
+fn format_decimal(buf: &mut [u8], value: u32) {
     let mut t = value;
     for index in (0..buf.len()).rev() {
         let v = match t % 10 {
@@ -50,7 +50,7 @@ fn format_decimal(buf : &mut [u8], value : u32) {
             7 => b'7',
             8 => b'8',
             9 => b'9',
-            _ => panic!("arithmetic confusion")
+            _ => panic!("arithmetic confusion"),
         };
         buf[index] = v;
         t = t / 10;
@@ -60,7 +60,7 @@ fn format_decimal(buf : &mut [u8], value : u32) {
     }
 }
 
-fn read_hex(buf : &[u8]) -> u64 {
+fn read_hex(buf: &[u8]) -> u64 {
     let mut t = 0u64;
     for index in 0..buf.len() {
         if buf[index] == b' ' {
@@ -85,7 +85,7 @@ fn read_hex(buf : &[u8]) -> u64 {
                 b'd' => 13,
                 b'e' => 14,
                 b'f' => 15,
-                _ => panic!("arithmetic confusion")
+                _ => panic!("arithmetic confusion"),
             };
             t = t * 16 + v;
         }
@@ -93,7 +93,7 @@ fn read_hex(buf : &[u8]) -> u64 {
     t
 }
 
-fn read_decimal(buf : &[u8]) -> u32 {
+fn read_decimal(buf: &[u8]) -> u32 {
     let mut t = 0u32;
     for index in 0..buf.len() {
         if buf[index] == b' ' {
@@ -112,7 +112,7 @@ fn read_decimal(buf : &[u8]) -> u32 {
                 b'7' => 7,
                 b'8' => 8,
                 b'9' => 9,
-                _ => panic!("arithmetic confusion")
+                _ => panic!("arithmetic confusion"),
             };
             t = t * 10 + v;
         }
@@ -135,15 +135,24 @@ impl BitSuffix {
     fn into_bytes(&self) -> [u8; REC_WIDTH] {
         let mut readbuf = [32u8; REC_WIDTH];
         readbuf[REC_WIDTH - 1] = 10;
-        format_hex(&mut readbuf[EX_OFFSET..(EX_OFFSET+EX_WIDTH)], self.exemplar);
-        format_decimal(&mut readbuf[BC_OFFSET..(BC_OFFSET+BC_WIDTH)], self.bitcount);
+        format_hex(
+            &mut readbuf[EX_OFFSET..(EX_OFFSET + EX_WIDTH)],
+            self.exemplar,
+        );
+        format_decimal(
+            &mut readbuf[BC_OFFSET..(BC_OFFSET + BC_WIDTH)],
+            self.bitcount,
+        );
         return readbuf;
     }
 
     fn from_bytes(buf: &[u8; REC_WIDTH]) -> BitSuffix {
-        let i = read_hex(&buf[EX_OFFSET..(EX_OFFSET+EX_WIDTH)]);
-        let bitcount = read_decimal(&buf[BC_OFFSET..(BC_OFFSET+BC_WIDTH)]);
-        return BitSuffix { bitcount: bitcount, exemplar: i };
+        let i = read_hex(&buf[EX_OFFSET..(EX_OFFSET + EX_WIDTH)]);
+        let bitcount = read_decimal(&buf[BC_OFFSET..(BC_OFFSET + BC_WIDTH)]);
+        return BitSuffix {
+            bitcount: bitcount,
+            exemplar: i,
+        };
     }
 }
 
@@ -156,14 +165,20 @@ fn run_collatz(ex: u64) -> BitSuffix {
     let mut bc = 0;
 
     if cc >= 1_u128 << 126 {
-        panic!("pre-emptively catch potential overflow {} (value {})", ex, cc);
+        panic!(
+            "pre-emptively catch potential overflow {} (value {})",
+            ex, cc
+        );
     }
 
     cc = cc * 3 + 1;
 
     while cc > cc_ex {
         if cc >= 1_u128 << 126 {
-            panic!("pre-emptively catch potential overflow {} (value {})", ex, cc);
+            panic!(
+                "pre-emptively catch potential overflow {} (value {})",
+                ex, cc
+            );
         }
         if cc % 2 == 1 {
             cc = cc * 3 + 1;
@@ -173,24 +188,24 @@ fn run_collatz(ex: u64) -> BitSuffix {
         }
     }
 
-    return BitSuffix { exemplar: ex, bitcount: bc };
+    return BitSuffix {
+        exemplar: ex,
+        bitcount: bc,
+    };
 }
 
 fn main() {
     let mut cutoff = 25;
     let mut filename = "collatz_exemplars.txt".to_string();
-    {  // this block limits scope of borrows by ap.refer() method
+    {
+        // this block limits scope of borrows by ap.refer() method
         let mut ap = ArgumentParser::new();
         ap.set_description("Compute collatz glide bitcounts for 1..2^cutoff");
         ap.refer(&mut cutoff)
-            .add_option(&["-c", "--cutoff"], Store,
-            "cutoff");
-        ap.refer(&mut filename)
-            .add_option(&["--file"], Store,
-            "");
+            .add_option(&["-c", "--cutoff"], Store, "cutoff");
+        ap.refer(&mut filename).add_option(&["--file"], Store, "");
         ap.parse_args_or_exit();
     }
-
 
     let mut bitcount = 1;
     //let mut sigs : Vec<BitSuffix> = Vec::new();
@@ -198,20 +213,16 @@ fn main() {
     let display = path.display();
 
     let mut outfile = match File::create(&path) {
-        Err(why) => panic!("couldn't create {}: {}",
-                           display,
-                           why),
+        Err(why) => panic!("couldn't create {}: {}", display, why),
         Ok(file) => file,
     };
 
     let mut infile = match File::open(&path) {
-        Err(why) => panic!("couldn't open for reading {}: {}",
-                           display,
-                           why),
+        Err(why) => panic!("couldn't open for reading {}: {}", display, why),
         Ok(file) => file,
     };
 
-    fn compute_and_push(ex : u64, ofile : &mut File) {
+    fn compute_and_push(ex: u64, ofile: &mut File) {
         let xx = run_collatz(ex);
         ofile.write_all(&xx.into_bytes()).unwrap();
     };
@@ -236,7 +247,7 @@ fn main() {
                     break;
                 }
                 if sig.bitcount >= bitcount {
-                    compute_and_push(base+sig.exemplar, &mut outfile);
+                    compute_and_push(base + sig.exemplar, &mut outfile);
                 }
             }
         }
@@ -253,7 +264,7 @@ fn main() {
     drop(infile);
     drop(outfile);
 
-/*
+    /*
     sigs.sort_by_key(|elt| elt.bitcount);
 
     for (k, grp) in &sigs.into_iter().group_by(|elt| elt.bitcount) {
