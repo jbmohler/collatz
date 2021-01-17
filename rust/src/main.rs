@@ -125,18 +125,24 @@ struct BitSuffix {
     bitcount: u32,
 }
 
+const EX_OFFSET: usize = 0;
+const EX_WIDTH: usize = 10;
+const BC_OFFSET: usize = EX_WIDTH + 1;
+const BC_WIDTH: usize = 6;
+const REC_WIDTH: usize = EX_WIDTH + BC_WIDTH + 2;
+
 impl BitSuffix {
-    fn into_bytes(&self) -> [u8; 26] {
-        let mut readbuf = [32u8; 26];
-        readbuf[25] = 10;
-        format_hex(&mut readbuf[0..12], self.exemplar);
-        format_decimal(&mut readbuf[13..25], self.bitcount);
+    fn into_bytes(&self) -> [u8; REC_WIDTH] {
+        let mut readbuf = [32u8; REC_WIDTH];
+        readbuf[REC_WIDTH - 1] = 10;
+        format_hex(&mut readbuf[EX_OFFSET..(EX_OFFSET+EX_WIDTH)], self.exemplar);
+        format_decimal(&mut readbuf[BC_OFFSET..(BC_OFFSET+BC_WIDTH)], self.bitcount);
         return readbuf;
     }
 
-    fn from_bytes(buf: &[u8; 26]) -> BitSuffix {
-        let i = read_hex(&buf[0..12]);
-        let bitcount = read_decimal(&buf[13..25]);
+    fn from_bytes(buf: &[u8; REC_WIDTH]) -> BitSuffix {
+        let i = read_hex(&buf[EX_OFFSET..(EX_OFFSET+EX_WIDTH)]);
+        let bitcount = read_decimal(&buf[BC_OFFSET..(BC_OFFSET+BC_WIDTH)]);
         return BitSuffix { bitcount: bitcount, exemplar: i };
     }
 }
@@ -221,7 +227,7 @@ fn main() {
             compute_and_push(1, &mut outfile);
         } else {
             infile.seek(SeekFrom::Start(0)).unwrap();
-            let mut readbuf = [0u8; 26];
+            let mut readbuf = [0u8; REC_WIDTH];
             loop {
                 infile.read_exact(&mut readbuf).unwrap();
 
