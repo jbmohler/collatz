@@ -145,12 +145,20 @@ fn run_collatz(ex: u64) -> BitSuffix {
     // only operates on odd positive integers
     assert!(ex > 0 && ex % 2 == 1);
 
-    let mut cc = ex;
+    let cc_ex: u128 = ex.into();
+    let mut cc = cc_ex;
     let mut bc = 0;
+
+    if cc >= 1_u128 << 126 {
+        panic!("pre-emptively catch potential overflow {} (value {})", ex, cc);
+    }
 
     cc = cc * 3 + 1;
 
-    while cc > ex {
+    while cc > cc_ex {
+        if cc >= 1_u128 << 126 {
+            panic!("pre-emptively catch potential overflow {} (value {})", ex, cc);
+        }
         if cc % 2 == 1 {
             cc = cc * 3 + 1;
         } else {
