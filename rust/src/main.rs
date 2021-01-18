@@ -1,9 +1,11 @@
 extern crate argparse;
 extern crate itertools;
 use argparse::{ArgumentParser, Store};
+use std::cmp::min;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::SeekFrom;
+use std::mem;
 use std::path::Path;
 
 fn format_hex(buf: &mut [u8], value: u64) {
@@ -131,19 +133,22 @@ const BC_OFFSET: usize = EX_WIDTH + 1;
 const BC_WIDTH: usize = 6;
 const REC_WIDTH: usize = EX_WIDTH + BC_WIDTH + 2;
 
+const MAX_CHUNK_SIZE: usize = 1_000_000;
+
 impl BitSuffix {
     fn into_bytes(&self) -> [u8; REC_WIDTH] {
-        let mut readbuf = [32u8; REC_WIDTH];
-        readbuf[REC_WIDTH - 1] = 10;
-        format_hex(
-            &mut readbuf[EX_OFFSET..(EX_OFFSET + EX_WIDTH)],
-            self.exemplar,
-        );
-        format_decimal(
-            &mut readbuf[BC_OFFSET..(BC_OFFSET + BC_WIDTH)],
-            self.bitcount,
-        );
-        return readbuf;
+        let mut writebuf = [32u8; REC_WIDTH];
+        self.into_bytes_buffer(&mut writebuf);
+        return writebuf;
+    }
+
+    fn into_bytes_buffer(&self, buf: &mut [u8; REC_WIDTH]) {
+        for i in &mut buf[0..REC_WIDTH - 1] {
+            *i = 32
+        }
+        buf[REC_WIDTH - 1] = 10;
+        format_hex(&mut buf[EX_OFFSET..(EX_OFFSET + EX_WIDTH)], self.exemplar);
+        format_decimal(&mut buf[BC_OFFSET..(BC_OFFSET + BC_WIDTH)], self.bitcount);
     }
 
     fn from_bytes(buf: &[u8; REC_WIDTH]) -> BitSuffix {
@@ -222,9 +227,26 @@ fn main() {
         Ok(file) => file,
     };
 
+    let mut written: usize = 0;
+
     fn compute_and_push(ex: u64, ofile: &mut File) {
         let xx = run_collatz(ex);
         ofile.write_all(&xx.into_bytes()).unwrap();
+    };
+
+    fn inplace_buf_advance(bufrecs: &mut [[u8; REC_WIDTH]], base: u64, bitcount: u32) -> usize {
+        let recs: usize = bufrecs.len();
+        let mut rewritten: usize = 0;
+
+        for index in 0..recs {
+            let sig = BitSuffix::from_bytes(&bufrecs[index]);
+            if sig.bitcount >= bitcount {
+                let xx = run_collatz(base + sig.exemplar);
+                xx.into_bytes_buffer(&mut bufrecs[rewritten]);
+                rewritten += 1;
+            }
+        }
+        return rewritten;
     };
 
     loop {
@@ -236,18 +258,51 @@ fn main() {
         if bitcount == 1 {
             // seed this
             compute_and_push(1, &mut outfile);
+            written += 1;
         } else {
-            infile.seek(SeekFrom::Start(0)).unwrap();
-            let mut readbuf = [0u8; REC_WIDTH];
-            loop {
-                infile.read_exact(&mut readbuf).unwrap();
+            if written > 0 {
+                infile.seek(SeekFrom::Start(0)).unwrap();
+                let chunk_size: usize = min(written, MAX_CHUNK_SIZE);
+                let pcc: usize = written / chunk_size;
+                // the actual chunk_count may need to be adjusted up
+                let chunk_count = pcc + (if pcc * chunk_size < written { 1 } else { 0 });
+                let total = written;
+                let mut read = 0;
+                for _ in 0..chunk_count {
+                    let this_read: usize = min(chunk_size, total - read);
+                    let mut readbuf = vec![0u8; REC_WIDTH * this_read];
+                    infile.read_exact(&mut readbuf).unwrap();
+                    read += this_read;
+                    // println!("Read {} records in chunk", this_read);
 
-                let sig = BitSuffix::from_bytes(&readbuf);
-                if sig.exemplar > base {
-                    break;
+                    let mut recs: Vec<[u8; REC_WIDTH]>;
+                    unsafe {
+                        recs = mem::transmute_copy::<Vec<u8>, Vec<[u8; REC_WIDTH]>>(&readbuf);
+                    }
+                    let rewritten = inplace_buf_advance(&mut recs[0..this_read], base, bitcount);
+                    mem::forget(recs);
+                    outfile
+                        .write_all(&readbuf[0..rewritten * REC_WIDTH])
+                        .unwrap();
+                    written += rewritten;
                 }
-                if sig.bitcount >= bitcount {
-                    compute_and_push(base + sig.exemplar, &mut outfile);
+                if read != total {
+                    panic!("read {} of {} desired records; confused", read, total);
+                }
+            } else {
+                infile.seek(SeekFrom::Start(0)).unwrap();
+                let mut readbuf = [0u8; REC_WIDTH];
+                loop {
+                    infile.read_exact(&mut readbuf).unwrap();
+
+                    let sig = BitSuffix::from_bytes(&readbuf);
+                    if sig.exemplar > base {
+                        break;
+                    }
+                    if sig.bitcount >= bitcount {
+                        compute_and_push(base + sig.exemplar, &mut outfile);
+                        written += 1;
+                    }
                 }
             }
         }
